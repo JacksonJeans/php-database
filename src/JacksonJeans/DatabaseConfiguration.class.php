@@ -38,12 +38,12 @@ class DatabaseConfiguration
     /**
      * @param int $port 
      */
-    public $port; 
+    public $port;
 
     /**
      * @param string $file 
      */
-    public $file; 
+    public $file;
 
     /**
      * @param string $instance

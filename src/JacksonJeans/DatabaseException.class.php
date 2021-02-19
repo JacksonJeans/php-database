@@ -4,6 +4,7 @@ namespace JacksonJeans;
 
 /**
  * DatabaseException
+ * 
  * @category    Class
  * @package     GIDUTEX
  * @author      Julian Tietz <julian.tietz@gidutex.de>

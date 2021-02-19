@@ -4,6 +4,7 @@ namespace JacksonJeans;
 
 /**
  * Database - Klasse
+ * 
  * @category    Class
  * @package     GIDUTEX
  * @author      Julian Tietz <julian.tietz@gidutex.de>
@@ -54,6 +55,12 @@ class Database implements DatabaseInterface
          * - Where-Ausdruck
          */
         $where,
+
+        /**
+         * @var string $whereIn
+         * -Where $column IN - Ausdruck
+         */
+        $whereIn,
 
         /**
          * @var string $orWhere 
@@ -641,7 +648,7 @@ class Database implements DatabaseInterface
 
         $columns = explode(',', $columns);
         $distinct = [];
-        foreach ($columns as $key => $column) {
+        foreach ($columns as $column) {
             $distinct[] = trim($column);
         }
 
@@ -976,6 +983,75 @@ class Database implements DatabaseInterface
             $this->where .= "" . trim($args[0]) . " " . $args[1] . " ?";
             $this->bindValues[] =  $args[2];
         }
+
+        return $this;
+    }
+
+    /**
+     * Füge eine Where In Anweisung hinzu
+     * @param string $columns
+     * - Spalten 
+     * @param array $data 
+     * - Daten die enthalten sein sollen
+     * @param bool $and 
+     * - Operator, And oder Or Verknüpfen
+     */
+    public function whereIn(string $columns, array $data, $and = true)
+    {
+        $columns = explode(',', $columns);
+        $in = [];
+        foreach ($columns as $column) {
+            $in[] = trim($column);
+        }
+
+        $columns = implode(', ', $in);
+
+        if ($this->whereCount == 0) {
+            $this->where .= " WHERE ";
+            $this->whereCount += 1;
+        } else {
+            $this->where .= ($and) ? " AND " : " OR ";
+        }
+
+        $data = join(',', $data);
+        $this->where .= "{$columns} IN ($data)";
+
+        return $this;
+    }
+
+    /**
+     * Füge eine Where Match Anweisung hinzu
+     * @param string $columns
+     * - Spalten 
+     * @param string|array|object $toString 
+     * - Daten die enthalten sein sollen als Array, String oder Objekte mit __toString() Methode. 
+     * @param string $operator 
+     * - Operator, falls Where Bedinung bereits vorhanden ist. And oder Or Verknüpfen
+     */
+    public function whereMatch(string $columns, $toString, $and = true)
+    {
+        $columns = explode(',', $columns);
+        $match = [];
+        foreach ($columns as $column) {
+            $match[] = trim($column);
+        }
+
+        $columns = implode(', ', $match);
+
+        if (is_array($toString)) {
+            $string = join(" ", $toString);
+        } else {
+            $string = (string) $toString;
+        }
+
+        if ($this->whereCount == 0) {
+            $this->where .= " WHERE ";
+            $this->whereCount += 1;
+        } else {
+            $this->where .= ($and) ? " AND " : " OR ";
+        }
+
+        $this->where = "MATCH ({$columns}) AGAINST ('{$string}')";
 
         return $this;
     }
